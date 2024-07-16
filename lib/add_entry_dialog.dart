@@ -1,5 +1,6 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api
 
+import 'util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -53,9 +54,11 @@ class _AddEntryDialogState extends State<AddEntryDialog> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
-                final TimeOfDay? picked = await showTimePicker(
+                final TimeOfDay? picked = await showDialog<TimeOfDay>(
                   context: context,
-                  initialTime: selectedStartTime,
+                  builder: (BuildContext context) {
+                    return CustomTimePicker(initialTime: selectedStartTime);
+                  },
                 );
                 if (picked != null && picked != selectedStartTime) {
                   setState(() {
@@ -63,7 +66,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> {
                   });
                 }
               },
-              child: Text(selectedStartTime.format(context)),
+              child: Text(DateFormat.Hm().format( DateTime( 0, 0, 0, selectedStartTime.hour, selectedStartTime.minute ))),
             ),
           ),
           const SizedBox(height: 16),
@@ -73,9 +76,11 @@ class _AddEntryDialogState extends State<AddEntryDialog> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
-                final TimeOfDay? picked = await showTimePicker(
+                final TimeOfDay? picked = await showDialog<TimeOfDay>(
                   context: context,
-                  initialTime: selectedEndTime,
+                  builder: (BuildContext context) {
+                    return CustomTimePicker(initialTime: selectedEndTime);
+                  },
                 );
                 if (picked != null && picked != selectedEndTime) {
                   setState(() {
@@ -83,7 +88,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> {
                   });
                 }
               },
-              child: Text(selectedEndTime.format(context)),
+              child: Text(DateFormat.Hm().format( DateTime( 0, 0, 0, selectedEndTime.hour, selectedEndTime.minute ))),
             ),
           ),
         ],

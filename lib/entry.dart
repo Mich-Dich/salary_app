@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'job_settings.dart';
 
 class Entry {
   DateTime date;
@@ -12,6 +13,18 @@ class Entry {
     required this.endTime,
     required this.amount,
   });
+
+  Entry.clone(Entry entry)
+      : date = entry.date,
+        startTime = entry.startTime,
+        endTime = entry.endTime,
+        amount = entry.amount;
+
+  void update(DateTime startTime, DateTime endTime) {
+    this.startTime = startTime;
+    this.endTime = endTime;
+    amount = calculateAmount();
+  }
 
   factory Entry.fromJson(Map<String, dynamic> json) {
     return Entry(
@@ -29,6 +42,34 @@ class Entry {
       'endTime': endTime.toIso8601String(),
       'amount': amount,
     };
+  }
+
+  double calculateAmount() {
+    final jobSettings = JobSettings();
+
+    final startMinutes = startTime.hour * 60 + startTime.minute;
+    final endMinutes = endTime.hour * 60 + endTime.minute;
+    final eveningBeginMinutes =
+        jobSettings.eveningBeginTime.hour * 60 + jobSettings.eveningBeginTime.minute;
+    final nightBeginMinutes =
+        jobSettings.nightBeginTime.hour * 60 + jobSettings.nightBeginTime.minute;
+
+    double totalAmount = 0.0;
+
+    for (int minute = startMinutes; minute < endMinutes; minute++) {
+      int currentHour = (minute ~/ 60) % 24;
+      int currentMinute = minute % 60;
+
+      if (minute >= nightBeginMinutes) {
+        totalAmount += jobSettings.nightHourlyRate / 60;
+      } else if (minute >= eveningBeginMinutes) {
+        totalAmount += jobSettings.eveningHourlyRate / 60;
+      } else {
+        totalAmount += jobSettings.hourlyRate / 60;
+      }
+    }
+
+    return totalAmount;
   }
 }
 

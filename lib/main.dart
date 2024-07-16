@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'entry.dart';
 import 'storage_handler.dart';
 import 'add_entry_dialog.dart';
+import 'util.dart';
 
 void main() {
   runApp(SalaryCalculatorApp());
@@ -168,9 +169,18 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
                           style: const TextStyle(color: Colors.white),
                         ),
                         subtitle: Text('Amount: \$${entry.amount.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white70)),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.settings),
+                              onPressed: () => _editEntry(entry),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                            ),
+                          ],
                         ),
                       )).toList(),
                     ),
@@ -183,6 +193,142 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
       },
     );
   }
+
+  void _editEntry(Entry entry) {
+    // Create a copy of the entry to edit
+    Entry editedEntry = Entry.clone(entry);
+
+    // Initialize variables with existing entry details
+    DateTime selectedStartTime = editedEntry.startTime;
+    DateTime selectedEndTime = editedEntry.endTime;
+
+    // Show dialog for editing entry details
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Edit Entry"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date picker
+              const Text("Date:", style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: editedEntry.date,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null && picked != editedEntry.date) {
+                      setState(() {
+                        editedEntry.date = picked;
+                      });
+                    }
+                  },
+                  child: Text(DateFormat.yMd().format(editedEntry.date)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Start Time picker
+              const Text("Start Time:", style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final TimeOfDay? picked = await showDialog<TimeOfDay>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomTimePicker(initialTime: TimeOfDay(hour: selectedStartTime.hour, minute: selectedStartTime.minute));
+                      },
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        selectedStartTime = DateTime(
+                          editedEntry.date.year,
+                          editedEntry.date.month,
+                          editedEntry.date.day,
+                          picked.hour,
+                          picked.minute,
+                        );
+                        editedEntry.startTime = selectedStartTime;                        
+                      });
+                    }
+                  },
+                  child: Text(DateFormat.Hm().format(selectedStartTime)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // End Time picker
+              const Text("End Time:", style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final TimeOfDay? picked = await showDialog<TimeOfDay>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomTimePicker(initialTime: TimeOfDay(hour: selectedEndTime.hour, minute: selectedEndTime.minute));
+                      },
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        selectedEndTime = DateTime(
+                          editedEntry.date.year,
+                          editedEntry.date.month,
+                          editedEntry.date.day,
+                          picked.hour,
+                          picked.minute,
+                        );
+                      });
+                    }
+                  },
+                  child: Text(DateFormat.Hm().format(selectedEndTime)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Update entry details
+                editedEntry.startTime = selectedStartTime;
+                editedEntry.endTime = selectedEndTime;
+                entry.calculateAmount();
+
+                // Replace old entry with edited entry in list
+                setState(() {
+                  int index = entries.indexOf(entry);
+                  entries[index] = editedEntry;
+                  storageHandler.writeEntries(entries);
+                });
+
+                Navigator.of(context).pop();
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
   void _handleFloatingActionButton() {
     final now = DateTime.now();
@@ -218,7 +364,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
     if (entryIndex != -1) {
       final entry = entries[entryIndex];
       entry.endTime = now;
-      entry.amount = 20.0 * entry.endTime.difference(entry.startTime).inHours.toDouble();
+      entry.calculateAmount();
 
       setState(() {
         storageHandler.writeEntries(entries);
@@ -247,6 +393,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
   }
 
   void _addNewEntry(DateTime selectedDate, TimeOfDay selectedStartTime, TimeOfDay selectedEndTime) {
+
     final DateTime startTime = DateTime(
       selectedDate.year,
       selectedDate.month,
@@ -254,6 +401,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
       selectedStartTime.hour,
       selectedStartTime.minute,
     );
+
     final DateTime endTime = DateTime(
       selectedDate.year,
       selectedDate.month,
@@ -262,15 +410,14 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
       selectedEndTime.minute,
     );
 
-    const double hourlyRate = 20.0; // Example hourly rate
-    final double amount = hourlyRate * endTime.difference(startTime).inHours.toDouble();
-
     final newEntry = Entry(
       date: selectedDate,
       startTime: startTime,
       endTime: endTime,
-      amount: amount,
+      amount: 0,
     );
+
+    newEntry.calculateAmount();
 
     setState(() {
       entries.add(newEntry);
