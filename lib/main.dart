@@ -132,6 +132,9 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
       groupedEntries[month]![day]!.add(entry);
     }
 
+    // Get the current month
+    String currentMonth = DateFormat.MMMM().format(DateTime.now());
+    
     // Build the list view
     return ListView.builder(
       itemCount: groupedEntries.length,
@@ -139,56 +142,110 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
         String month = groupedEntries.keys.elementAt(monthIndex);
         Map<int, List<Entry>> entriesByDay = groupedEntries[month]!;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
+        // Calculate total amount for the month
+        double totalAmountForMonth = 0;
+        entriesByDay.values.forEach((entries) {
+          entries.forEach((entry) {
+            totalAmountForMonth += entry.amount;
+          });
+        });
+
+        return ExpansionTile(
+          initiallyExpanded: month == currentMonth,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 month,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
-            ),
-            Column(
-              children: entriesByDay.keys.map((day) {
-                List<Entry> entriesOfDay = entriesByDay[day]!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Text(
+                '\$${totalAmountForMonth.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ],
+          ),
+          children: entriesByDay.keys.map((day) {
+            List<Entry> entriesOfDay = entriesByDay[day]!;
+            if (entriesOfDay.length == 1) {
+              Entry entry = entriesOfDay.first;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        day.toString(),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                    Text(
+                      '${day.toString().padLeft(2, '0')}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
-                    Column(
-                      children: entriesOfDay.map((entry) => ListTile(
-                        title: Text(
-                          'Time: ${DateFormat.Hm().format(entry.startTime)} ${entry.endTime == entry.startTime ? '---' : '- ${DateFormat.Hm().format(entry.endTime)}'}',
-                          style: const TextStyle(color: Colors.white),
+                    Text(
+                      '${DateFormat.Hm().format(entry.startTime)} ${entry.endTime == entry.startTime ? '---' : '- ${DateFormat.Hm().format(entry.endTime)}'}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    Text(
+                      '${entry.amount.toStringAsFixed(2)}\€',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.settings),
+                          onPressed: () => _editEntry(entry),
                         ),
-                        subtitle: Text('Amount: \$${entry.amount.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white70)),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.settings),
-                              onPressed: () => _editEntry(entry),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => _deleteEntry(entries.indexOf(entry)),
-                            ),
-                          ],
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _deleteEntry(entries.indexOf(entry)),
                         ),
-                      )).toList(),
+                      ],
                     ),
                   ],
-                );
-              }).toList(),
-            ),
-          ],
+                ),
+              );
+            } else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      day.toString(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ),
+                  Column(
+                    children: entriesOfDay.map((entry) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '   ${DateFormat.Hm().format(entry.startTime).padLeft(5, '0')} ${entry.endTime == entry.startTime ? '---' : '- ${DateFormat.Hm().format(entry.endTime).padLeft(5, '0')}'}',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          Text(
+                            '\$${entry.amount.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.settings),
+                                onPressed: () => _editEntry(entry),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )).toList(),
+                  ),
+                ],
+              );
+            }
+          }).toList(),
         );
       },
     );
@@ -365,6 +422,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
       final entry = entries[entryIndex];
       entry.endTime = now;
       entry.calculateAmount();
+      storageHandler.writeEntries(entries);
 
       setState(() {
         storageHandler.writeEntries(entries);

@@ -1,5 +1,6 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, curly_braces_in_flow_control_structures
 
+import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -34,9 +35,25 @@ class StorageHandler {
   }
 
   Future<File> writeEntries(List<Entry> entries) async {
+
+    Stopwatch stopwatch = Stopwatch();
+    stopwatch.start();
+
+    // Sort entries by date
+    entries.sort((a, b) => a.date.compareTo(b.date));
+
+    // Recalculate amount for each entry
+    for (var entry in entries) 
+      entry.amount = entry.calculateAmount();
+
     final file = await _localFile;
     List<Map<String, dynamic>> jsonEntries = entries.map((entry) => entry.toJson()).toList();
     String json = jsonEncode(jsonEntries);
+
+    stopwatch.stop();
+    Duration elapsed = stopwatch.elapsed;
+    print('Elapsed time: ${elapsed.inMilliseconds} milliseconds');
+
     return file.writeAsString(json);
   }
 }

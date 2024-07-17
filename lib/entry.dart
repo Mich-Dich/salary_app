@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'dart:convert';
 import 'job_settings.dart';
 
@@ -43,34 +45,63 @@ class Entry {
       'amount': amount,
     };
   }
-
+  
   double calculateAmount() {
     final jobSettings = JobSettings();
 
-    final startMinutes = startTime.hour * 60 + startTime.minute;
-    final endMinutes = endTime.hour * 60 + endTime.minute;
-    final eveningBeginMinutes =
-        jobSettings.eveningBeginTime.hour * 60 + jobSettings.eveningBeginTime.minute;
-    final nightBeginMinutes =
-        jobSettings.nightBeginTime.hour * 60 + jobSettings.nightBeginTime.minute;
+    final DateTime startOfEvening = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      jobSettings.eveningBeginTime.hour,
+      jobSettings.eveningBeginTime.minute,
+    );
 
-    double totalAmount = 0.0;
+    final DateTime startOfNight = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      jobSettings.nightBeginTime.hour,
+      jobSettings.nightBeginTime.minute,
+    );
 
-    for (int minute = startMinutes; minute < endMinutes; minute++) {
-      int currentHour = (minute ~/ 60) % 24;
-      int currentMinute = minute % 60;
+    double normalRate = jobSettings.hourlyRate / 60;
+    double eveningRate = jobSettings.eveningHourlyRate / 60;
+    double nightRate = jobSettings.nightHourlyRate / 60;
 
-      if (minute >= nightBeginMinutes) {
-        totalAmount += jobSettings.nightHourlyRate / 60;
-      } else if (minute >= eveningBeginMinutes) {
-        totalAmount += jobSettings.eveningHourlyRate / 60;
+    // Calculate durations in minutes for each rate segment
+    int normalMinutes = 0;
+    int eveningMinutes = 0;
+    int nightMinutes = 0;
+
+    // Calculate duration from startTime to endTime
+    int durationInMinutes = endTime.difference(startTime).inMinutes;
+
+    // Determine minutes spent in each segment
+    if (startTime.isBefore(startOfEvening) && endTime.isAfter(startOfEvening)) {
+      normalMinutes += startOfEvening.difference(startTime).inMinutes;
+      if (endTime.isBefore(startOfNight)) {
+        eveningMinutes += endTime.difference(startOfEvening).inMinutes;
       } else {
-        totalAmount += jobSettings.hourlyRate / 60;
+        eveningMinutes += startOfNight.difference(startOfEvening).inMinutes;
+        nightMinutes += endTime.difference(startOfNight).inMinutes;
       }
-    }
+    } else if (startTime.isBefore(startOfNight) && endTime.isAfter(startOfNight)) {
+      eveningMinutes += startOfNight.difference(startTime).inMinutes;
+      nightMinutes += endTime.difference(startOfNight).inMinutes;
+    } else
+      normalMinutes += durationInMinutes;
 
+    // Calculate amounts based on the calculated minutes and rates
+    double totalAmount = normalMinutes * normalRate +
+        eveningMinutes * eveningRate +
+        nightMinutes * nightRate;
+
+    amount = totalAmount;
     return totalAmount;
   }
+
+
 }
 
 List<Entry> parseEntries(String jsonString) {
