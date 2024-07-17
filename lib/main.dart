@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'entry.dart';
 import 'storage_handler.dart';
 import 'add_entry_dialog.dart';
+import 'edit_entry_dialog.dart';
 import 'util.dart';
 
 void main() {
@@ -16,6 +17,7 @@ class SalaryCalculatorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Salary Calculator',
+      debugShowCheckedModeBanner: false,  // Disable the debug banner
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.blue[800], // Dark blue as primary color
@@ -134,7 +136,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
 
     // Get the current month
     String currentMonth = DateFormat.MMMM().format(DateTime.now());
-    
+
     // Build the list view
     return ListView.builder(
       itemCount: groupedEntries.length,
@@ -144,11 +146,9 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
 
         // Calculate total amount for the month
         double totalAmountForMonth = 0;
-        entriesByDay.values.forEach((entries) {
-          entries.forEach((entry) {
+        for (var entries in entriesByDay.values)
+          for (var entry in entries)
             totalAmountForMonth += entry.amount;
-          });
-        });
 
         return ExpansionTile(
           initiallyExpanded: month == currentMonth,
@@ -160,7 +160,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Text(
-                '\$${totalAmountForMonth.toStringAsFixed(2)}',
+                '${totalAmountForMonth.toStringAsFixed(2)}€',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ],
@@ -175,7 +175,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${day.toString().padLeft(2, '0')}',
+                      day.toString().padLeft(2, '0'),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     Text(
@@ -183,7 +183,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     Text(
-                      '${entry.amount.toStringAsFixed(2)}\€',
+                      '${entry.amount.toStringAsFixed(2)}€',
                       style: const TextStyle(color: Colors.white70),
                     ),
                     Row(
@@ -223,7 +223,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(
-                            '\$${entry.amount.toStringAsFixed(2)}',
+                            '${entry.amount.toStringAsFixed(2)}€',
                             style: const TextStyle(color: Colors.white70),
                           ),
                           Row(
@@ -252,140 +252,24 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
   }
 
   void _editEntry(Entry entry) {
-    // Create a copy of the entry to edit
-    Entry editedEntry = Entry.clone(entry);
-
-    // Initialize variables with existing entry details
-    DateTime selectedStartTime = editedEntry.startTime;
-    DateTime selectedEndTime = editedEntry.endTime;
-
-    // Show dialog for editing entry details
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Edit Entry"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Date picker
-              const Text("Date:", style: TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: editedEntry.date,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null && picked != editedEntry.date) {
-                      setState(() {
-                        editedEntry.date = picked;
-                      });
-                    }
-                  },
-                  child: Text(DateFormat.yMd().format(editedEntry.date)),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Start Time picker
-              const Text("Start Time:", style: TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final TimeOfDay? picked = await showDialog<TimeOfDay>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return CustomTimePicker(initialTime: TimeOfDay(hour: selectedStartTime.hour, minute: selectedStartTime.minute));
-                      },
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        selectedStartTime = DateTime(
-                          editedEntry.date.year,
-                          editedEntry.date.month,
-                          editedEntry.date.day,
-                          picked.hour,
-                          picked.minute,
-                        );
-                        editedEntry.startTime = selectedStartTime;                        
-                      });
-                    }
-                  },
-                  child: Text(DateFormat.Hm().format(selectedStartTime)),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // End Time picker
-              const Text("End Time:", style: TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final TimeOfDay? picked = await showDialog<TimeOfDay>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return CustomTimePicker(initialTime: TimeOfDay(hour: selectedEndTime.hour, minute: selectedEndTime.minute));
-                      },
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        selectedEndTime = DateTime(
-                          editedEntry.date.year,
-                          editedEntry.date.month,
-                          editedEntry.date.day,
-                          picked.hour,
-                          picked.minute,
-                        );
-                      });
-                    }
-                  },
-                  child: Text(DateFormat.Hm().format(selectedEndTime)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Update entry details
-                editedEntry.startTime = selectedStartTime;
-                editedEntry.endTime = selectedEndTime;
-                entry.calculateAmount();
-
-                // Replace old entry with edited entry in list
-                setState(() {
-                  int index = entries.indexOf(entry);
-                  entries[index] = editedEntry;
-                  storageHandler.writeEntries(entries);
-                });
-
-                Navigator.of(context).pop();
-              },
-              child: const Text("Save"),
-            ),
-          ],
+        return EditEntryDialog(
+          entry: entry,
+          onSave: (editedEntry) {
+            setState(() {
+              int index = entries.indexOf(entry);
+              if (index != -1) {
+                entries[index] = editedEntry;
+                storageHandler.writeEntries(entries);
+              }
+            });
+          },
         );
       },
     );
   }
-
-
 
   void _handleFloatingActionButton() {
     final now = DateTime.now();
