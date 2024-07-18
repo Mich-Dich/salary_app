@@ -1,6 +1,7 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
 import 'dart:convert';
+import 'dart:math';
 import 'job_settings.dart';
 
 class Entry {
@@ -97,8 +98,8 @@ class Entry {
         eveningMinutes * eveningRate +
         nightMinutes * nightRate;
 
-    amount = totalAmount;
-    return totalAmount;
+    amount = max(0, totalAmount);
+    return amount;
   }
 
 

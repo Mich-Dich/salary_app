@@ -116,8 +116,7 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
     );
   }
 
-
-    Widget _buildEntriesList() {
+  Widget _buildEntriesList() {
     Map<String, Map<int, List<Entry>>> groupedEntries = {};
 
     for (var entry in entries) {
@@ -146,124 +145,200 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
           for (var entry in entries)
             totalAmountForMonth += entry.amount;
 
-        return ExpansionTile(
-          initiallyExpanded: month == currentMonth,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                month,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-              Text(
-                '${totalAmountForMonth.toStringAsFixed(2)}€',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ],
-          ),
-          children: entriesByWeek.keys.map((week) {
-            List<Entry> entriesOfWeek = entriesByWeek[week]!;
-            bool isExpanded = false;
+        return Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 16.0), // Spacing between months
+              child: ExpansionTile(
+                initiallyExpanded: month == currentMonth,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      month,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    Text(
+                      '${totalAmountForMonth.toStringAsFixed(2)}€',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ],
+                ),
+                children: entriesByWeek.keys.map((week) {
+                  List<Entry> entriesOfWeek = entriesByWeek[week]!;
+                  bool isExpanded = false;
 
-            double totalAmountForWeek = 0;
-            int totalMinutesForWeek = 0;
-            for (var entry in entriesOfWeek) {
-              totalAmountForWeek += entry.amount;
-              totalMinutesForWeek += entry.endTime.difference(entry.startTime).inMinutes;
-            }
+                  double totalAmountForWeek = 0;
+                  int totalMinutesForWeek = 0;
+                  Set<int> daysWorked = {};
+                  for (var entry in entriesOfWeek) {
+                    totalAmountForWeek += entry.amount;
+                    totalMinutesForWeek += entry.endTime.difference(entry.startTime).inMinutes;
+                    daysWorked.add(entry.date.weekday);
+                  }
 
-            int hours = totalMinutesForWeek ~/ 60;
-            int minutes = totalMinutesForWeek % 60;
-            String totalHoursForWeek = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+                  int hours = totalMinutesForWeek ~/ 60;
+                  int minutes = totalMinutesForWeek % 60;
+                  String totalHoursForWeek = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
 
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Week $week',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                isExpanded ? Icons.remove : Icons.add,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isExpanded = !isExpanded;
-                                });
-                              },
-                            ),
-                          ],
+                  final eightHoursInMinutes = 8 * 60;
+                  final workedMinutes = totalMinutesForWeek;
+                  final differenceInMinutes = workedMinutes - eightHoursInMinutes;
+
+                  String differenceText;
+                  Color differenceColor;
+
+                  if (differenceInMinutes > 0) {
+                    differenceText = '-${formatDuration(Duration(minutes: differenceInMinutes))}';
+                    differenceColor = Colors.red;
+                  } else {
+                    differenceText = formatDuration(Duration(minutes: -differenceInMinutes));
+                    differenceColor = Colors.green;
+                  }
+
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16.0), // Spacing between weeks
+                        decoration: BoxDecoration(
+                          color: isExpanded ? Colors.grey[800] : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                      ),
-                      Column(
-                        children: entriesOfWeek.map((entry) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${DateFormat.MMMd().format(entry.date)}: ${DateFormat.Hm().format(entry.startTime)} - ${DateFormat.Hm().format(entry.endTime)}',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                '${entry.amount.toStringAsFixed(2)}€',
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                              Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.settings),
-                                    onPressed: () => _editEntry(entry),
+                                  Text(
+                                    'Week $week',
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Hours: $totalHoursForWeek ',
+                                        style: const TextStyle(color: Colors.white70),
+                                      ),
+                                      const SizedBox(width: 4.0), // Add a small gap between texts
+                                      Text(
+                                        differenceText,
+                                        style: TextStyle(color: differenceColor),
+                                      ),
+                                    ],
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                                    icon: Icon(
+                                      isExpanded ? Icons.remove : Icons.add,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isExpanded = !isExpanded;
+                                      });
+                                    },
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        )).toList(),
-                      ),
-                      if (isExpanded)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Total hours worked: $totalHoursForWeek',
-                                style: const TextStyle(color: Colors.white70),
+                            ),
+                            Column(
+                              children: entriesOfWeek.map((entry) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '${DateFormat.MMMd().format(entry.date)}: ${DateFormat.Hm().format(entry.startTime)} - ${DateFormat.Hm().format(entry.endTime)}',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    Text(
+                                      '${entry.amount.toStringAsFixed(2)}€',
+                                      style: const TextStyle(color: Colors.white70),
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.settings),
+                                          onPressed: () => _editEntry(entry),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete),
+                                          onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )).toList(),
+                            ),
+                            if (isExpanded)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: List.generate(7, (index) {
+                                        int day = index + 1;
+                                        bool worked = daysWorked.contains(day);
+                                        String dayLabel = DateFormat.E().format(DateTime(2023, 1, day)).toUpperCase();
+
+                                        return Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          decoration: BoxDecoration(
+                                            color: worked ? Colors.grey : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(4.0),
+                                          ),
+                                          child: Text(
+                                            dayLabel,
+                                            style: const TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Total hours: $totalHoursForWeek  ',
+                                          style: const TextStyle(color: Colors.white70),
+                                        ),
+                                        Text(
+                                          differenceText,
+                                          style: TextStyle(color: differenceColor),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      'Total amount: ${totalAmountForWeek.toStringAsFixed(2)}€',
+                                      style: const TextStyle(color: Colors.white70),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Text(
-                                'Total amount earned: ${totalAmountForWeek.toStringAsFixed(2)}€',
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
+                          ],
                         ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }).toList(),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
 
+  String formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
 
   void _editEntry(Entry entry) {
     showDialog(
@@ -289,11 +364,10 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
     final now = DateTime.now();
     final currentDate = DateTime(now.year, now.month, now.day);
     final entryIndex = entries.indexWhere((entry) => entry.date == currentDate);
-    if (entryIndex != -1) {
+    if (entryIndex != -1) 
       _stopEntry();
-    } else {
+    else 
       _startEntry();
-    }
   }
 
   void _startEntry() {
