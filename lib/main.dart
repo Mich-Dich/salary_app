@@ -6,7 +6,6 @@ import 'entry.dart';
 import 'storage_handler.dart';
 import 'add_entry_dialog.dart';
 import 'edit_entry_dialog.dart';
-import 'util.dart';
 
 void main() {
   runApp(SalaryCalculatorApp());
@@ -117,36 +116,33 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
     );
   }
 
-  Widget _buildEntriesList() {
-    // Group entries by month and day
+
+    Widget _buildEntriesList() {
     Map<String, Map<int, List<Entry>>> groupedEntries = {};
 
     for (var entry in entries) {
       String month = DateFormat.MMMM().format(entry.date);
-      int day = entry.date.day;
+      int week = ((entry.date.day - 1) ~/ 7) + 1;
 
       if (!groupedEntries.containsKey(month))
         groupedEntries[month] = {};
 
-      if (!groupedEntries[month]!.containsKey(day))
-        groupedEntries[month]![day] = [];
+      if (!groupedEntries[month]!.containsKey(week))
+        groupedEntries[month]![week] = [];
 
-      groupedEntries[month]![day]!.add(entry);
+      groupedEntries[month]![week]!.add(entry);
     }
 
-    // Get the current month
     String currentMonth = DateFormat.MMMM().format(DateTime.now());
 
-    // Build the list view
     return ListView.builder(
       itemCount: groupedEntries.length,
       itemBuilder: (context, monthIndex) {
         String month = groupedEntries.keys.elementAt(monthIndex);
-        Map<int, List<Entry>> entriesByDay = groupedEntries[month]!;
+        Map<int, List<Entry>> entriesByWeek = groupedEntries[month]!;
 
-        // Calculate total amount for the month
         double totalAmountForMonth = 0;
-        for (var entries in entriesByDay.values)
+        for (var entries in entriesByWeek.values)
           for (var entry in entries)
             totalAmountForMonth += entry.amount;
 
@@ -165,91 +161,109 @@ class _SalaryCalculatorHomePageState extends State<SalaryCalculatorHomePage> {
               ),
             ],
           ),
-          children: entriesByDay.keys.map((day) {
-            List<Entry> entriesOfDay = entriesByDay[day]!;
-            if (entriesOfDay.length == 1) {
-              Entry entry = entriesOfDay.first;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      day.toString().padLeft(2, '0'),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    Text(
-                      '${DateFormat.Hm().format(entry.startTime)} ${entry.endTime == entry.startTime ? '---' : '- ${DateFormat.Hm().format(entry.endTime)}'}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    Text(
-                      '${entry.amount.toStringAsFixed(2)}€',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.settings),
-                          onPressed: () => _editEntry(entry),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => _deleteEntry(entries.indexOf(entry)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      day.toString(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                  ),
-                  Column(
-                    children: entriesOfDay.map((entry) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '   ${DateFormat.Hm().format(entry.startTime).padLeft(5, '0')} ${entry.endTime == entry.startTime ? '---' : '- ${DateFormat.Hm().format(entry.endTime).padLeft(5, '0')}'}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            '${entry.amount.toStringAsFixed(2)}€',
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.settings),
-                                onPressed: () => _editEntry(entry),
+          children: entriesByWeek.keys.map((week) {
+            List<Entry> entriesOfWeek = entriesByWeek[week]!;
+            bool isExpanded = false;
+
+            double totalAmountForWeek = 0;
+            int totalMinutesForWeek = 0;
+            for (var entry in entriesOfWeek) {
+              totalAmountForWeek += entry.amount;
+              totalMinutesForWeek += entry.endTime.difference(entry.startTime).inMinutes;
+            }
+
+            int hours = totalMinutesForWeek ~/ 60;
+            int minutes = totalMinutesForWeek % 60;
+            String totalHoursForWeek = '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Week $week',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                isExpanded ? Icons.remove : Icons.add,
+                                color: Colors.white,
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                              onPressed: () {
+                                setState(() {
+                                  isExpanded = !isExpanded;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        children: entriesOfWeek.map((entry) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${DateFormat.MMMd().format(entry.date)}: ${DateFormat.Hm().format(entry.startTime)} - ${DateFormat.Hm().format(entry.endTime)}',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                '${entry.amount.toStringAsFixed(2)}€',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.settings),
+                                    onPressed: () => _editEntry(entry),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () => _deleteEntry(entries.indexOf(entry)),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        )).toList(),
                       ),
-                    )).toList(),
+                      if (isExpanded)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total hours worked: $totalHoursForWeek',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                              Text(
+                                'Total amount earned: ${totalAmountForWeek.toStringAsFixed(2)}€',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                ],
-              );
-            }
+                );
+              },
+            );
           }).toList(),
         );
       },
     );
   }
+
+
 
   void _editEntry(Entry entry) {
     showDialog(
