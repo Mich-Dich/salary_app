@@ -53,7 +53,7 @@
       "name": "flutter",
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
     },
     {
       "name": "flutter_lints",
@@ -65,7 +65,7 @@
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
     },
     {
       "name": "infinite_listview",
@@ -75,27 +75,27 @@
     },
     {
       "name": "intl",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.18.1",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "leak_tracker",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.0",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker-10.0.4",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_flutter_testing",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-2.0.1",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_flutter_testing-3.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "leak_tracker_testing",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-2.0.1",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/leak_tracker_testing-3.0.1",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.2"
     },
     {
       "name": "lints",
@@ -117,7 +117,13 @@
     },
     {
       "name": "meta",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.11.0",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.12.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "nested",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -182,6 +188,12 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "provider",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/provider-6.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "sky_engine",
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
@@ -219,7 +231,7 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.6.1",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -231,9 +243,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-13.0.0",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-14.2.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.3"
     },
     {
       "name": "xdg_directories",
@@ -248,7 +260,10 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-07-18T20:50:05.239241Z",
+  "generated": "2024-07-19T18:16:57.591231Z",
   "generator": "pub",
-  "generatorVersion": "3.3.2"
+  "generatorVersion": "3.4.4",
+  "flutterRoot": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter",
+  "flutterVersion": "3.22.3",
+  "pubCache": "file:///C:/Users/mally/AppData/Local/Pub/Cache"
 }

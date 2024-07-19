@@ -1,1 +1,0 @@
- C:\\dev_uni\\mobile_anwendungen\\salary_app\\.dart_tool\\flutter_build\\00f2720deff695d20f11433d8b82f3dc\\native_assets.yaml: 
