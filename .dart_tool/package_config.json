@@ -50,6 +50,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "file",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/file-7.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "flutter",
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/packages/flutter",
       "packageUri": "lib/",
@@ -66,6 +72,12 @@
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/packages/flutter_test",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "flutter_web_plugins",
+      "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/packages/flutter_web_plugins",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "infinite_listview",
@@ -194,6 +206,48 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "shared_preferences",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "shared_preferences_android",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "shared_preferences_foundation",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "shared_preferences_linux",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_linux-2.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "shared_preferences_platform_interface",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "shared_preferences_web",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_web-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "shared_preferences_windows",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_windows-2.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "sky_engine",
       "rootUri": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
@@ -248,6 +302,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "web",
+      "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/web-0.5.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "xdg_directories",
       "rootUri": "file:///C:/Users/mally/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.0.4",
       "packageUri": "lib/",
@@ -260,7 +320,7 @@
       "languageVersion": "3.3"
     }
   ],
-  "generated": "2024-07-19T18:16:57.591231Z",
+  "generated": "2024-07-19T18:50:40.245159Z",
   "generator": "pub",
   "generatorVersion": "3.4.4",
   "flutterRoot": "file:///C:/Users/mally/Desktop/Applications/Setup/flutter",
